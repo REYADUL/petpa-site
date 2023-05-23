@@ -86,7 +86,7 @@
                 $title         = "";
                 $description   = "";
                 $category      = $category_name;
-                $Price         = "";
+                $price         = "";
                 $img           = "";
                 $url           = $url;
                 $page          = file_get_html($url,false,get_context());
