@@ -16,7 +16,7 @@
 
     $count = 0;
 
-    crawl_page($fp,$count,$url);
+    crawl_page($fp,$count,$url,$domain);
 
     fclose($fp);
     echo "<!DONE>\n";

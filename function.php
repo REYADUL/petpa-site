@@ -22,21 +22,24 @@
         return $context;
     }
     
-    function crawl_page($fp,$count,$url)
+    function crawl_page($fp,$count,$url,$domain)
     {
         $i=0;
         $link=$url;
         while(1)
         {
             $i++;
-            $html = file_get_html($link,false,get_context());
+            // $html = file_get_html($link,false,get_context());
+            $html = new simple_html_dom();
+            $html->load_file($link, false, get_context());
             echo "Page= ".$i."\n";
             // $items = $html->find('h2.overlay-title  heading-font-4  overlay-title--');
             $allCollection = $html->find('a.standard-link');
 
             foreach($allCollection  as $collection)
             {
-                $collection_page_link = $collection->href;
+                $link = $collection->href;
+                $collection_page_link=$domain.$link;
                 
                 while(1)
                 {
@@ -60,7 +63,7 @@
                 {
                     $link                 =$page->find('span.next a',0);
                     $new_link             = $link->href;
-                    $collection_page_link = $new_link;
+                    $collection_page_link = $domain.$new_link;
                     $page                 = "";
                 }
 
@@ -73,7 +76,7 @@
             {
                 $new_page=$html->find('span.next a',0);
                 $new_page_link = $new_page->href;
-                $link = $new_page_link;
+                $link = $domain.$new_page_link;
                 echo $link;
                 $html = "";
             }
