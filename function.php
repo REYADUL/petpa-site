@@ -25,10 +25,13 @@
     function crawl_page($fp,$count,$url,$domain)
     {
         $i=0;
+        
         $link=$url;
+        $domain = "https://yourpetpa.com.au";
         while(1)
         {
             $i++;
+            
             // $html = file_get_html($link,false,get_context());
             $html = new simple_html_dom();
             $html->load_file($link, false, get_context());
@@ -38,20 +41,27 @@
 
             foreach($allCollection  as $collection)
             {
-                $link = $collection->href;
-                $collection_page_link=$domain.$link;
-                
+                $link                 = $collection->href;
+                $collection_page_link = $domain.$link;
+
+                echo $collection_page_link."\n";
+                $p=0;
                 while(1)
                 {
+                $p++;
+                $page                 = new simple_html_dom();
+                $page                 ->load_file($collection_page_link,false,get_context());
+                $category_name        = $page->find('meta[property=og:title]',0)->content;
 
-                $page                 = file_get_html($collection_page_link,false,get_context());
-                $category_name        = $page->find('h2.large-title',0);
+                echo "Product_list_page= ".$p."\n";
+
                 $products             = $page->find('a.product-block__title-link');
 
                 foreach($products as $product)
-                {
-                    $array = get_product(++$count,$product->href,$category_name);
-                    echo $count.">>>".$array['price']."\n";
+                {   
+                    $product_details_link = $domain.$product->href;
+                    $array = get_product(++$count,$product_details_link,$category_name);
+                    echo $count.">>>".$array['Price']."\n";
                     
                     if($array!==null)
                     {
@@ -64,6 +74,7 @@
                     $link                 =$page->find('span.next a',0);
                     $new_link             = $link->href;
                     $collection_page_link = $domain.$new_link;
+                    echo $collection_page_link."\n";
                     $page                 = "";
                 }
 
@@ -77,7 +88,7 @@
                 $new_page=$html->find('span.next a',0);
                 $new_page_link = $new_page->href;
                 $link = $domain.$new_page_link;
-                echo $link;
+                echo $link."\n";
                 $html = "";
             }
             else break;
@@ -93,6 +104,8 @@
                 $img           = "";
                 $url           = $url;
                 $page          = file_get_html($url,false,get_context());
+                // $page          = new simple_html_dom();
+                // $page          -> load($url,false,get_context());
                 if(!empty($page))
                 {
                     if($page->find('meta[property=og:title]',0)!=NULL)
@@ -107,11 +120,19 @@
                     $description = trim($p->content);
                 }
 
-                if($page->find('span.theme-money',0)!=NULL)
+                if($page->find('span.product-price__compare',0)!=NULL)
                 {
-                    $p = $page->find('span.theme-money',0);
-                    $price = $p->plaintext;;
+                    $p = $page->find('span.product-price__compare ',0);
+                    $save =  $page->find('span.theme-money span.percent__discount ',0)->plaintext;
+                    $text = trim($p->plaintext);
+                    $remove   = array("Don't pay this","save",$save);
+                    $price = str_replace($remove,' ', $text);
                 }
+                // elseif($page->find('span.theme-money',0)!=NULL)
+                // {
+                //     $p = $page->find('span.theme-money',0);
+                //     $price = $p->plaintext;
+                // }
                 if($page->find('meta[property=og:image:secure_url]',0) != NULL)
                 {
                     $m= $page->find('meta[property=og:image:secure_url]',0);
