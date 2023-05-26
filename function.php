@@ -28,17 +28,17 @@
         
         $link=$url;
         $domain = "https://yourpetpa.com.au";
+        $all_uniqe_title = array();
+        $length = count($all_uniqe_title);
+        $length++;
         while(1)
         {
             $i++;
-            
-            // $html = file_get_html($link,false,get_context());
             $html = new simple_html_dom();
             $html->load_file($link, false, get_context());
             echo "Page= ".$i."\n";
-            // $items = $html->find('h2.overlay-title  heading-font-4  overlay-title--');
             $allCollection = $html->find('a.standard-link');
-
+            
             foreach($allCollection  as $collection)
             {
                 $link                 = $collection->href;
@@ -60,10 +60,20 @@
                 foreach($products as $product)
                 {   
                     $product_details_link = $domain.$product->href;
-                    $array = get_product(++$count,$product_details_link,$category_name);
-                    echo $count.">>>".$array['Price']."\n";
-                    
-                    if($array!==null)
+                    $array = get_product($length,$product_details_link,$category_name);
+                    echo ++$count.">>>".$array['Price']."\n";
+                    echo 'title'.">>>".$array['title']."\n";
+
+                    $data_insert=0;
+                    if (!in_array($array['title'], $all_uniqe_title) && $array!==null) 
+                    {
+                        $all_uniqe_title[] = $array['title'];
+                        $data_insert=1;
+                        $length++;
+                        
+                    } 
+                    // var_dump($all_uniqe_title);                
+                    if($data_insert)
                     {
                         fputcsv($fp,$array);
                     }
@@ -104,11 +114,15 @@
                 $img           = "";
                 $url           = $url;
                 $page          = file_get_html($url,false,get_context());
-                // $page          = new simple_html_dom();
-                // $page          -> load($url,false,get_context());
+                
                 if(!empty($page))
                 {
-                    if($page->find('meta[property=og:title]',0)!=NULL)
+                if($page->find('h3.product-detail__title',0)!=NULL)
+                {
+                    $t = $page->find('h3.product-detail__title',0);
+                    $title = $t->plaintext;
+                }
+                elseif($page->find('meta[property=og:title]',0)!=NULL)
                 {
                     $t = $page->find('meta[property=og:title]',0);
                     $title = $t->content;
@@ -128,6 +142,7 @@
                     $remove   = array("Don't pay this","save",$save);
                     $price = str_replace($remove,' ', $text);
                 }
+                
                 // elseif($page->find('span.theme-money',0)!=NULL)
                 // {
                 //     $p = $page->find('span.theme-money',0);
