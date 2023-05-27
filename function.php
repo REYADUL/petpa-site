@@ -134,7 +134,12 @@
                     $description = trim($p->content);
                 }
 
-                if($page->find('span.product-price__compare',0)!=NULL)
+                if($page->find('span.theme-money',1)!=NULL)
+                {
+                    $p = $page->find('span.theme-money',1);
+                    $price = $p->plaintext;
+                }
+                elseif($page->find('span.product-price__compare',0)!=NULL)
                 {
                     $p = $page->find('span.product-price__compare ',0);
                     $save =  $page->find('span.theme-money span.percent__discount ',0)->plaintext;
@@ -143,11 +148,7 @@
                     $price = str_replace($remove,' ', $text);
                 }
                 
-                // elseif($page->find('span.theme-money',0)!=NULL)
-                // {
-                //     $p = $page->find('span.theme-money',0);
-                //     $price = $p->plaintext;
-                // }
+                
                 if($page->find('meta[property=og:image:secure_url]',0) != NULL)
                 {
                     $m= $page->find('meta[property=og:image:secure_url]',0);
